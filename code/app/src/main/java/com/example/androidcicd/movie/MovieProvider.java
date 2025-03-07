@@ -1,5 +1,7 @@
 package com.example.androidcicd.movie;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -49,9 +51,16 @@ public class MovieProvider {
     }
 
     public void updateMovie(Movie movie, String title, String genre, int year) {
+        // We only consider it a “new” title if the user is changing it to something else
+        // But for simplicity, we’ll just enforce uniqueness every time, skipping the same movie’s ID
+        if (!isTitleUnique(title, movie.getId())) {
+            throw new IllegalArgumentException("Duplicate Movie Title!");
+        }
+
         movie.setTitle(title);
         movie.setGenre(genre);
         movie.setYear(year);
+
         DocumentReference docRef = movieCollection.document(movie.getId());
         if (validMovie(movie, docRef)) {
             docRef.set(movie);
@@ -63,6 +72,13 @@ public class MovieProvider {
     public void addMovie(Movie movie) {
         DocumentReference docRef = movieCollection.document();
         movie.setId(docRef.getId());
+
+        // Enforce uniqueness
+        if (!isTitleUnique(movie.getTitle(), null)) {
+            // We throw an exception or handle this differently
+            throw new IllegalArgumentException("Duplicate Movie Title!");
+        }
+
         if (validMovie(movie, docRef)) {
             docRef.set(movie);
         } else {
@@ -78,4 +94,19 @@ public class MovieProvider {
     public boolean validMovie(Movie movie, DocumentReference docRef) {
         return movie.getId().equals(docRef.getId()) && !movie.getTitle().isEmpty() && !movie.getGenre().isEmpty() && movie.getYear() > 0;
     }
+
+    private boolean isTitleUnique(String title, @Nullable String ignoreMovieId) {
+        for (Movie m : movies) {
+            // If we are editing a movie, we should skip checking its own ID
+            if (ignoreMovieId != null && m.getId().equals(ignoreMovieId)) {
+                continue;
+            }
+            // Compare titles case-insensitively, or adjust as you prefer
+            if (m.getTitle().equalsIgnoreCase(title)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
