@@ -12,9 +12,12 @@ public class MovieProvider {
     private final ArrayList<Movie> movies;
     private final CollectionReference movieCollection;
 
-    private MovieProvider(FirebaseFirestore firestore) {
+    public MovieProvider(FirebaseFirestore firestore) {
         movies = new ArrayList<>();
         movieCollection = firestore.collection("movies");
+    }
+
+    public static void setInstanceForTesting(FirebaseFirestore mockFirestore) {
     }
 
     public interface DataStatus {
