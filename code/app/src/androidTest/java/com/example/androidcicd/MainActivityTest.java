@@ -10,6 +10,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.test.espresso.ViewInteraction;
@@ -66,6 +67,7 @@ public class MainActivityTest {
             movie.setId(docRef.getId());
             docRef.set(movie);
         }
+        SystemClock.sleep(2000);
     }
 
     @Test
